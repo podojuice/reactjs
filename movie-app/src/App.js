@@ -19,22 +19,42 @@ class App extends Component {
 
     componentDidMount() {
         // 이게 3번으로 실행 됨.
-        fetch('https://yts.lt/api/v2/list_movies.json?sort_by=rating')
-        .then(res => console.log(res.json()))
-        .catch(err => console.log(err))
+        this._getMovies();
     }
 
     _renderMovies = () => {
         const movies = this.state.movies.map((movie, index) => {
-            return <Movie title = {movie.title} poster = {movie.poster} key = {index} />
+            console.log(movie);
+            return <Movie 
+            title = {movie.title_english} 
+            poster = {movie.medium_cover_image} 
+            key = {movie.id} 
+            genres={movie.genres} 
+            synopsis = {movie.synopsis}
+            />
         })
         return movies
     }
 
+     _getMovies = async () => {
+        const movies  = await this._callApi();
+        this.setState({
+            movies: movies
+        })
+    }
+
+    _callApi = () => {
+        return fetch('https://yts.lt/api/v2/list_movies.json?sort_by=download_count')
+        .then(res => res.json())
+        .then(json => json.data.movies)
+        .catch(err => console.log(err))
+    }
+
     render() {
         // 얘가 2번으로 실행된다.
+        const {movies} = this.state;
         return (
-            <div className = "App" >
+            <div className ={movies ? "App": "App-loading"}>
                 {this.state.movies ? this._renderMovies() : 'Loading'}
             </div>
     );
